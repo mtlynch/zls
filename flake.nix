@@ -1,16 +1,15 @@
 {
-  inputs =
-    {
-      nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-      zig-overlay.url = "github:mitchellh/zig-overlay";
-      zig-overlay.inputs.nixpkgs.follows = "nixpkgs";
+    zig-overlay.url = "github:mitchellh/zig-overlay";
+    zig-overlay.inputs.nixpkgs.follows = "nixpkgs";
 
-      gitignore.url = "github:hercules-ci/gitignore.nix";
-      gitignore.inputs.nixpkgs.follows = "nixpkgs";
+    gitignore.url = "github:hercules-ci/gitignore.nix";
+    gitignore.inputs.nixpkgs.follows = "nixpkgs";
 
-      flake-utils.url = "github:numtide/flake-utils";
-    };
+    flake-utils.url = "github:numtide/flake-utils";
+  };
 
   outputs = { self, nixpkgs, zig-overlay, gitignore, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -22,8 +21,8 @@
       rec {
         formatter = pkgs.nixpkgs-fmt;
         packages.default = packages.zls;
-        packages.zls = pkgs.stdenvNoCC.mkDerivation {
-          name = "zls";
+        packages.zls = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+          pname = "zls";
           version = "master";
           src = gitignoreSource ./.;
           nativeBuildInputs = [ zig ];
@@ -38,7 +37,10 @@
           checkPhase = ''
             zig build test --global-cache-dir $(pwd)/.cache --system $PACKAGE_DIR -Dcpu=baseline
           '';
-        };
+          passthru = {
+            inherit zig;
+          };
+        });
       }
     );
 }
